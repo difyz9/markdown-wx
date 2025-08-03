@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信公众号 Markdown 转换 API 测试</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container { 
+            display: flex; 
+            gap: 20px; 
+            height: 600px;
+        }
+        .input-section, .output-section { 
+            flex: 1; 
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .section-header {
+            padding: 15px 20px;
+            background: #007cba;
+            color: white;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        textarea { 
+            flex: 1;
+            border: none;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+        .button-container {
+            padding: 15px 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        button { 
+            padding: 12px 24px; 
+            background: #007cba; 
+            color: white; 
+            border: none; 
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        button:hover { 
+            background: #005a87; 
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .output { 
+            flex: 1;
+            padding: 20px; 
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .status {
+            padding: 10px 20px;
+            margin: 0;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.loading { background: #d1ecf1; color: #0c5460; }
+        
+        /* 微信公众号样式预览 */
+        .wechat-preview {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>微信公众号 Markdown 转换 API 测试</h1>
+        <p>在左侧输入 Markdown 内容，点击转换按钮查看微信公众号样式效果</p>
+    </div>
+    
+    <div class="container">
+        <div class="input-section">
+            <h3 class="section-header">📝 Markdown 输入</h3>
+            <textarea id="markdown-input" placeholder="在此输入 Markdown 内容..."># 微信公众号文章标题
+
+这是一篇**测试文章**，展示各种 Markdown 语法的转换效果。
+
+## 文本样式
+
+- 这是**粗体文本**
+- 这是*斜体文本*
+- 这是`行内代码`
+
+## 列表示例
+
+### 无序列表
+- 第一项内容
+- 第二项内容
+  - 嵌套列表项
+  - 另一个嵌套项
+- 第三项内容
+
+### 有序列表
+1. 首先做这个
+2. 然后做那个
+3. 最后完成这个
+
+## 代码块示例
+
+```javascript
+// JavaScript 代码示例
+function greetUser(name) {
+    console.log(`欢迎来到微信公众号，${name}！`);
+}
+
+greetUser('读者');
+```
+
+```python
+# Python 代码示例
+def calculate_sum(numbers):
+    return sum(numbers)
+
+result = calculate_sum([1, 2, 3, 4, 5])
+print(f"计算结果: {result}")
+```
+
+## 引用块
+
+> 这是一段重要的引用内容，用于强调某个观点或者引用他人的话语。引用块在微信公众号中会有特殊的样式。
+
+## 链接和图片
+
+访问 [GitHub](https://github.com) 了解更多开源项目。
+
+## 表格示例
+
+| 功能 | 描述 | 状态 |
+|------|------|------|
+| Markdown 转换 | 将 MD 转为微信格式 | ✅ 完成 |
+| 语法高亮 | 代码块语法高亮 | ✅ 完成 |
+| 数学公式 | LaTeX 公式支持 | ✅ 完成 |
+| 自定义主题 | 多种样式主题 | ✅ 完成 |
+
+## 数学公式
+
+行内公式：$E = mc^2$
+
+块级公式：
+$$
+\sum_{i=1}^{n} x_i = x_1 + x_2 + \cdots + x_n
+$$
+
+---
+
+以上就是微信公众号 Markdown 编辑器的功能展示！</textarea>
+            <div class="button-container">
+                <button onclick="convertMarkdown()" id="convert-btn">🔄 转换为微信公众号格式</button>
+            </div>
+        </div>
+        
+        <div class="output-section">
+            <h3 class="section-header">👀 转换结果预览</h3>
+            <div id="output" class="output">
+                <div style="text-align: center; color: #666; padding: 50px;">
+                    <p>📄</p>
+                    <p>点击转换按钮查看微信公众号样式效果</p>
+                </div>
+            </div>
+            <div id="status" class="status" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        async function convertMarkdown() {
+            const markdownContent = document.getElementById('markdown-input').value;
+            const outputDiv = document.getElementById('output');
+            const statusDiv = document.getElementById('status');
+            const convertBtn = document.getElementById('convert-btn');
+            
+            if (!markdownContent.trim()) {
+                showStatus('请输入 Markdown 内容', 'error');
+                return;
+            }
+            
+            // 显示加载状态
+            convertBtn.disabled = true;
+            convertBtn.textContent = '⏳ 转换中...';
+            showStatus('正在转换 Markdown 内容...', 'loading');
+            outputDiv.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;"><p>🔄</p><p>转换中，请稍候...</p></div>';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        markdown: markdownContent
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    outputDiv.innerHTML = `<div class="wechat-preview">${result.html}</div>`;
+                    showStatus('✅ 转换成功！可以复制内容到微信公众号编辑器', 'success');
+                } else {
+                    outputDiv.innerHTML = `<div style="text-align: center; color: #d32f2f; padding: 50px;"><p>❌</p><p>转换失败</p><p>${result.error}</p></div>`;
+                    showStatus(`转换失败: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `<div style="text-align: center; color: #d32f2f; padding: 50px;"><p>🔌</p><p>连接失败</p><p>${error.message}</p><p>请确保服务器正在运行 (http://localhost:8080)</p></div>`;
+                showStatus(`请求失败: ${error.message}`, 'error');
+            } finally {
+                // 恢复按钮状态
+                convertBtn.disabled = false;
+                convertBtn.textContent = '🔄 转换为微信公众号格式';
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+        }
+
+        // 键盘快捷键支持
+        document.getElementById('markdown-input').addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                convertMarkdown();
+            }
+        });
+
+        // 页面加载时的提示
+        window.addEventListener('load', function() {
+            showStatus('💡 提示: 使用 Ctrl+Enter (Mac: Cmd+Enter) 快速转换', 'loading');
+            setTimeout(() => {
+                document.getElementById('status').style.display = 'none';
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
