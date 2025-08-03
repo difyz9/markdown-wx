@@ -126,6 +126,327 @@ markdown-wx/
 }
 ```
 
+### 使用示例
+
+#### 1. 使用 curl 调用接口
+
+```bash
+curl -X POST http://localhost:8080/api/convert \
+  -H "Content-Type: application/json" \
+  -d '{
+    "markdown": "# 微信公众号文章\n\n这是一篇**测试文章**，包含以下内容：\n\n## 主要特点\n\n- 支持*斜体*和**粗体**\n- 支持代码：`console.log(\"Hello World\")`\n- 支持列表和链接\n\n## 代码示例\n\n```javascript\nfunction hello(name) {\n  console.log(`Hello, ${name}!`);\n}\n```\n\n> 这是一段引用文字，用于强调重要内容。\n\n访问 [GitHub](https://github.com) 了解更多信息。"
+  }'
+```
+
+#### 2. 使用 JavaScript fetch API
+
+```javascript
+async function convertMarkdown() {
+  const markdownContent = `# 微信公众号文章
+
+这是一篇**测试文章**，包含以下内容：
+
+## 主要特点
+
+- 支持*斜体*和**粗体**
+- 支持代码：\`console.log("Hello World")\`
+- 支持列表和链接
+
+## 代码示例
+
+\`\`\`javascript
+function hello(name) {
+  console.log(\`Hello, \${name}!\`);
+}
+\`\`\`
+
+> 这是一段引用文字，用于强调重要内容。
+
+访问 [GitHub](https://github.com) 了解更多信息。`;
+
+  try {
+    const response = await fetch('http://localhost:8080/api/convert', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        markdown: markdownContent
+      })
+    });
+
+    const result = await response.json();
+    
+    if (result.success) {
+      console.log('转换成功！');
+      console.log('HTML 内容:', result.html);
+      
+      // 将结果显示在页面上
+      document.getElementById('output').innerHTML = result.html;
+    } else {
+      console.error('转换失败:', result.error);
+    }
+  } catch (error) {
+    console.error('请求失败:', error);
+  }
+}
+
+// 调用函数
+convertMarkdown();
+```
+
+#### 3. 使用 Python requests
+
+```python
+import requests
+import json
+
+def convert_markdown():
+    url = "http://localhost:8080/api/convert"
+    
+    markdown_content = """# 微信公众号文章
+
+这是一篇**测试文章**，包含以下内容：
+
+## 主要特点
+
+- 支持*斜体*和**粗体**
+- 支持代码：`console.log("Hello World")`
+- 支持列表和链接
+
+## 代码示例
+
+```python
+def hello(name):
+    print(f"Hello, {name}!")
+```
+
+> 这是一段引用文字，用于强调重要内容。
+
+访问 [GitHub](https://github.com) 了解更多信息。"""
+
+    payload = {
+        "markdown": markdown_content
+    }
+    
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.post(url, data=json.dumps(payload), headers=headers)
+        response.raise_for_status()
+        
+        result = response.json()
+        
+        if result['success']:
+            print("转换成功！")
+            print("HTML 内容:")
+            print(result['html'])
+            
+            # 可以将结果保存到文件
+            with open('output.html', 'w', encoding='utf-8') as f:
+                f.write(result['html'])
+            print("结果已保存到 output.html")
+        else:
+            print(f"转换失败: {result['error']}")
+            
+    except requests.exceptions.RequestException as e:
+        print(f"请求失败: {e}")
+
+# 调用函数
+if __name__ == "__main__":
+    convert_markdown()
+```
+
+#### 4. 使用 Go 调用接口
+
+```go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "io"
+    "net/http"
+)
+
+type ConvertRequest struct {
+    Markdown string `json:"markdown"`
+}
+
+type ConvertResponse struct {
+    HTML    string `json:"html"`
+    Success bool   `json:"success"`
+    Error   string `json:"error,omitempty"`
+}
+
+func main() {
+    markdownContent := `# 微信公众号文章
+
+这是一篇**测试文章**，包含以下内容：
+
+## 主要特点
+
+- 支持*斜体*和**粗体**
+- 支持代码：` + "`console.log(\"Hello World\")`" + `
+- 支持列表和链接
+
+## 代码示例
+
+` + "```go" + `
+func hello(name string) {
+    fmt.Printf("Hello, %s!\n", name)
+}
+` + "```" + `
+
+> 这是一段引用文字，用于强调重要内容。
+
+访问 [GitHub](https://github.com) 了解更多信息。`
+
+    // 创建请求体
+    reqBody := ConvertRequest{
+        Markdown: markdownContent,
+    }
+
+    jsonData, err := json.Marshal(reqBody)
+    if err != nil {
+        fmt.Printf("序列化请求失败: %v\n", err)
+        return
+    }
+
+    // 发送 POST 请求
+    resp, err := http.Post("http://localhost:8080/api/convert", 
+        "application/json", bytes.NewBuffer(jsonData))
+    if err != nil {
+        fmt.Printf("请求失败: %v\n", err)
+        return
+    }
+    defer resp.Body.Close()
+
+    // 读取响应
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        fmt.Printf("读取响应失败: %v\n", err)
+        return
+    }
+
+    // 解析响应
+    var result ConvertResponse
+    if err := json.Unmarshal(body, &result); err != nil {
+        fmt.Printf("解析响应失败: %v\n", err)
+        return
+    }
+
+    if result.Success {
+        fmt.Println("转换成功！")
+        fmt.Println("HTML 内容:")
+        fmt.Println(result.HTML)
+    } else {
+        fmt.Printf("转换失败: %s\n", result.Error)
+    }
+}
+```
+
+#### 5. 完整的 HTML 测试页面
+
+创建一个 `test.html` 文件来测试接口：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { display: flex; gap: 20px; }
+        .input-section, .output-section { flex: 1; }
+        textarea { width: 100%; height: 300px; font-family: monospace; }
+        button { padding: 10px 20px; background: #007cba; color: white; border: none; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .output { border: 1px solid #ddd; padding: 15px; min-height: 300px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>微信公众号 Markdown 转换 API 测试</h1>
+    
+    <div class="container">
+        <div class="input-section">
+            <h3>输入 Markdown</h3>
+            <textarea id="markdown-input" placeholder="在此输入 Markdown 内容..."># 微信公众号文章
+
+这是一篇**测试文章**，包含以下内容：
+
+## 主要特点
+
+- 支持*斜体*和**粗体**
+- 支持代码：`console.log("Hello World")`
+- 支持列表和链接
+
+## 代码示例
+
+```javascript
+function hello(name) {
+  console.log(`Hello, ${name}!`);
+}
+```
+
+> 这是一段引用文字，用于强调重要内容。
+
+访问 [GitHub](https://github.com) 了解更多信息。</textarea>
+            <br><br>
+            <button onclick="convertMarkdown()">转换为微信公众号格式</button>
+        </div>
+        
+        <div class="output-section">
+            <h3>转换结果</h3>
+            <div id="output" class="output">点击转换按钮查看结果...</div>
+        </div>
+    </div>
+
+    <script>
+        async function convertMarkdown() {
+            const markdownContent = document.getElementById('markdown-input').value;
+            const outputDiv = document.getElementById('output');
+            
+            if (!markdownContent.trim()) {
+                outputDiv.innerHTML = '<p style="color: red;">请输入 Markdown 内容</p>';
+                return;
+            }
+            
+            outputDiv.innerHTML = '<p>转换中...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/convert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        markdown: markdownContent
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    outputDiv.innerHTML = result.html;
+                } else {
+                    outputDiv.innerHTML = `<p style="color: red;">转换失败: ${result.error}</p>`;
+                }
+            } catch (error) {
+                outputDiv.innerHTML = `<p style="color: red;">请求失败: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
+```
+```
+
 ## 技术栈
 
 ### 后端
